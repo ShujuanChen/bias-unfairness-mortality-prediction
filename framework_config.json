@@ -1,0 +1,88 @@
+{
+  "cohort": {
+    "england_only": true,
+    "age_min": 40,
+    "age_max": 69
+  },
+  "phase1": {
+    "hse_ukb": {
+      "models": [
+        "lassologit",
+        "superlearner"
+      ]
+    },
+    "census_ukb": {
+      "models": [
+        "superlearner"
+      ]
+    }
+  },
+  "phase2": {
+    "transfer_model_family": "linear_cox",
+    "python_env_name": "",
+    "deep_surv_spec_path": "mortality_risk_prediction/code/evaluate/deep_surv_specs/final_locked_v1.json",
+    "write_model_fitting_outputs": true,
+    "outcome_key": "all_cause_mortality",
+    "weight_source_keys": [
+      "hse_lassologit",
+      "hse_superlearner",
+      "census_superlearner"
+    ],
+    "weight_source_key": "hse_superlearner",
+    "outcomes": {
+      "all_cause_mortality": {
+        "label": "All-cause mortality",
+        "type": "all_cause"
+      },
+      "cancer_mortality": {
+        "label": "Cancer (all malignant neoplasms)",
+        "type": "cause_specific",
+        "match_scope": "underlying",
+        "icd10": [
+          "C00-C97"
+        ]
+      },
+      "cardiovascular_mortality": {
+        "label": "Cardiovascular diseases",
+        "type": "cause_specific",
+        "match_scope": "underlying",
+        "icd10": [
+          "I00-I99"
+        ]
+      },
+      "respiratory_mortality": {
+        "label": "Respiratory diseases",
+        "type": "cause_specific",
+        "match_scope": "underlying",
+        "icd10": [
+          "J00-J99"
+        ]
+      },
+      "digestive_mortality": {
+        "label": "Digestive diseases",
+        "type": "cause_specific",
+        "match_scope": "underlying",
+        "icd10": [
+          "K20-K93"
+        ]
+      }
+    },
+    "weight_sources": {
+      "hse_lassologit": {
+        "label": "HSE lasso-penalised logistic",
+        "path": "UKB_weighting_HSE/results/lassologit/weights/ukb_weights.csv",
+        "column": "w"
+      },
+      "hse_superlearner": {
+        "label": "HSE Super Learner",
+        "path": "UKB_weighting_HSE/results/superlearner/weights/ukb_weights.csv",
+        "column": "w"
+      },
+      "census_superlearner": {
+        "label": "Census Super Learner",
+        "path": "UKB_weighting_census/results/superlearner/weights/ukb_weights.csv",
+        "column": "w"
+      }
+    }
+  }
+}

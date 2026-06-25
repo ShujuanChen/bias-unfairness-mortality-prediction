@@ -1,0 +1,34 @@
+# Never commit restricted individual-level data or generated outputs.
+# Keep the directory skeletons and their README/.gitkeep placeholders.
+
+# Restricted input data (UK Biobank, PMR/Census, HSE) — never redistribute
+mortality_risk_prediction/data/**
+UKB_weighting_HSE/data/**
+UKB_weighting_census/data/**
+# Re-include the directory skeletons (not their data contents) so the
+# placeholder .gitkeep/README files still ship.
+!mortality_risk_prediction/data/**/
+!UKB_weighting_HSE/data/**/
+!UKB_weighting_census/data/**/
+!**/README.md
+!**/.gitkeep
+
+# Ship the synthetic-data generator scripts (but not the data they produce)
+!mortality_risk_prediction/data/make_synthetic_data.R
+!UKB_weighting_HSE/data/make_synthetic_data.R
+!UKB_weighting_census/data/make_synthetic_data.R
+
+# Generated outputs
+**/results/**
+!**/results/README.md
+!**/results/.gitkeep
+logs/
+
+# Internal notes — not for publication
+/TODO.md
+
+# Misc
+__pycache__/
+*.pyc
+.Rhistory
+.DS_Store

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tutorial and reproduction guide</title>
+<style>
+  :root{--fg:#1b1f24;--muted:#5b6570;--accent:#0b5fa5;--bg:#fff;--code-bg:#f5f7f9;--border:#e3e8ee;}
+  *{box-sizing:border-box;}
+  body{margin:0;color:var(--fg);background:var(--bg);line-height:1.65;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:820px;margin:0 auto;padding:48px 24px 80px;}
+  header{border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:28px;}
+  h1{font-size:1.7rem;margin:0 0 .35rem;line-height:1.3;}
+  h2{font-size:1.3rem;margin:2.4rem 0 .8rem;padding-top:.6rem;border-top:1px solid var(--border);}
+  h3{font-size:1.05rem;margin:1.6rem 0 .5rem;}
+  .sub{color:var(--muted);margin:.2rem 0 0;}
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  code{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:.1em .35em;font-size:.9em;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 18px;overflow:auto;}
+  pre code{background:none;border:none;padding:0;font-size:.86rem;line-height:1.55;}
+  .muted{color:var(--muted);font-size:.92rem;}
+  .toc{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px 20px;}
+  footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);color:var(--muted);font-size:.9rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Selective health data drive bias and unfairness in mortality prediction</h1>
+  <p class="sub">Tutorial and reproduction guide for the analysis code</p>
+</header>
+
+<p>This page is the formatted version of the two step-by-step guides in the code repository. Tutorial 1 shows how to run the analysis code that reproduces the study results. Tutorial 2 shows how to generate the UK Biobank participation weights and also runs as a demonstration on simulated data. For the project overview, the software requirements, the installation procedure, the data and access routes and the full file layout, please see the
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction">repository README</a>.</p>
+
+<div class="toc">
+  <strong>On this page</strong>
+  <ul>
+    <li><a href="#tutorial-1">Tutorial 1: how to run the analysis code for the study results</a></li>
+    <li><a href="#tutorial-2">Tutorial 2: how to generate the UKB participation weights</a></li>
+  </ul>
+</div>
+
+<h2 id="tutorial-1">Tutorial 1: how to run the analysis code for the study results</h2>
+
+<p>This tutorial demonstrates how to run the analysis code that reproduces the study. The same commands run on the real data inside the approved secure environments and on simulated data. Because individual-level data are held only in those secure environments, synthetic generators are provided so that anyone can apply this framework to their own application. The simulated inputs are written by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/data/make_synthetic_data.R">mortality_risk_prediction/data/make_synthetic_data.R</a> together with the generators used in Tutorial 2. Settings for every run are held in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/framework_config.json">framework_config.json</a> and
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/framework_config.R">framework_config.R</a>. Mortality risk is modelled with a weighted deep survival network, and with a Cox proportional-hazards model for sensitivity analysis. The analysis proceeds in three stages, including variable harmonisation, prediction bias quantification from models developed on different datasets, and then potential bias correction.</p>
+
+<h3>Stage 1. Harmonisation</h3>
+<p>This stage brings the UK Biobank and the linked census-mortality cohort onto a shared schema of eleven predictors and restricts each cohort to the inclusion criteria.</p>
+<pre><code>Rscript mortality_risk_prediction/code/UKB/UKB_prepare.R
+Rscript mortality_risk_prediction/code/PMR/PMR_prepare.R</code></pre>
+<p>The variables of UK Biobank are assembled by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/UKB/UKB_prepare.R">UKB_prepare.R</a>, which recodes the variables in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/UKB/UKB_harmonise.R">UKB_harmonise.R</a> based on the mapping rule (details in the supplementary material). Linkage of UKB to neighbourhood socioeconomic data uses the public geography lookups in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/UKB/merge_geography_UKB.R">merge_geography_UKB.R</a>. The variables of the linked census-mortality side are assembled by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/PMR/PMR_prepare.R">PMR_prepare.R</a>, which recodes the raw extract in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/PMR/PMR_harmonise.R">PMR_harmonise.R</a>, attaches geography in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/PMR/merge_geography.R">merge_geography.R</a>, and restricts the cohort in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/PMR/row_harmonisation_PMR.R">row_harmonisation_PMR.R</a>. The all-cause and cause-specific survival outcomes from the underlying cause of death are in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/PMR/clean_outcomes.R">clean_outcomes.R</a>. The population characteristics of the cohorts, Supplementary Table S1, are produced by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/UKB/descriptive_ukb.R">descriptive_ukb.R</a> and
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/PMR/descriptive_pmr.R">descriptive_pmr.R</a>. The details of the geography lookups and neighbourhood socioeconomic data from the Office for National Statistics are listed in the README inside each lookup folder.</p>
+
+<h3>Stage 2. Quantifying prediction bias</h3>
+<p>This stage trains separate models on the selective UK Biobank cohort and equivalent models on the representative linked census-mortality benchmark, deploys both to the same target population, and compares predicted risk with observed deaths, holding all other analytic conditions constant. The benchmark model confirms that the same modelling framework is well calibrated when it is trained on representative data, so any excess bias from the UK Biobank model can be attributed to the selective composition of its training data.</p>
+<pre><code>python mortality_risk_prediction/code/evaluate/deep_surv.py train --cause &lt;cause&gt; --source &lt;source&gt; --fold &lt;fold&gt;
+python mortality_risk_prediction/code/evaluate/deep_surv.py ensemble --cause &lt;cause&gt;</code></pre>
+<p>The model is trained separately for each of the common causes of death, which is handled by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/deep_surv.py">deep_surv.py</a>. The survival components (for example, the weighted Cox partial likelihood, the weighted Breslow baseline hazard and the construction of the mortality outcomes) are in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/dl_components.py">dl_components.py</a>, and the final network architecture is recorded in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/deep_surv_specs/final_locked_v1.json">final_locked_v1.json</a>. Prediction bias across outcomes is plotted by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig2_prediction_bias_by_cause.py">fig2_prediction_bias_by_cause.py</a>, calibration is plotted by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig3_calibration.py">fig3_calibration.py</a>, and prediction bias across sociodemographic subgroups is plotted by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig4_prediction_bias_by_strata.py">fig4_prediction_bias_by_strata.py</a>. The confidence intervals are derived from 200 non-parametric bootstrap resamples of the target population, computed by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/bootstrap_ci.py">bootstrap_ci.py</a> and
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/bootstrap_ci_overall.py">bootstrap_ci_overall.py</a>. Shared plotting helpers and the subgroup definitions are in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/helpers.py">helpers.py</a>.</p>
+
+<h3>Stage 3. Correcting the bias</h3>
+<p>This stage reweights the UKB cohort towards the target population using the participation weights from Tutorial 2, retrains the models on the weighted UK Biobank cohort, deploys them to the target population, and measures how much of the missed mortality burden is recovered. The three weighted training sources are UKB separately weighted using the HSE Super Learner weights, which are the primary correction, the HSE lasso weights and the Census Super Learner weights. The weights are produced exactly as in Tutorial 2, after which the deep survival model is trained again with the weighted sources by re-running
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/deep_surv.py">deep_surv.py</a>.</p>
+<p>Bias correction across outcomes is plotted by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig5_bias_correction_by_cause.py">fig5_bias_correction_by_cause.py</a> and across sociodemographic subgroups by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig6_bias_correction_by_strata.py">fig6_bias_correction_by_strata.py</a>. The results for bias correction are produced by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/results_table.py">results_table.py</a>.</p>
+<p>We conducted a series of robustness tests of the findings. The alternative reference dataset and weighting method are plotted by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig7_sensitivity_census_sl.py">fig7_sensitivity_census_sl.py</a> and
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/fig7_sensitivity_hse_ll.py">fig7_sensitivity_hse_ll.py</a>. The alternative prediction model is the Cox proportional-hazards model, which is evaluated by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/mortality_bias_evaluate.R">mortality_bias_evaluate.R</a> using the model library in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/models.R">models.R</a> and the configuration accessors in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/evaluate/mortality_bias_config.R">mortality_bias_config.R</a>, and is plotted against the deep survival model by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/mortality_risk_prediction/code/visualise/figS13_cox_vs_deepsurv.py">figS13_cox_vs_deepsurv.py</a>. To select the Cox path, set <code>phase2.transfer_model_family</code> to <code>linear_cox</code> in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/framework_config.json">framework_config.json</a>.</p>
+
+<h2 id="tutorial-2">Tutorial 2: how to generate the UKB participation weights</h2>
+
+<p>Two nationally representative datasets are used as reference datasets for generating participation weights. The Health Survey for England (HSE) is the primary reference and the 2011 Census microdata is the sensitivity reference. The weights are estimated with a Super Learner ensemble as the primary method and with lasso-penalised logistic regression as a sensitivity method.</p>
+
+<p>This section also demonstrates how to run this code using simulated data. Synthetic inputs that share the structure of the real data are used in this demo, so the code can be exercised without any restricted-data access.</p>
+
+<h3>Step 1. Generate the synthetic inputs</h3>
+<p>Each data folder includes a generator that writes synthetic inputs with the same column names, value ranges and directory layout as the real data. Continuous fields are drawn from the real range and categorical fields are drawn from the observed set of values, so that no real data is read or embedded.</p>
+<pre><code>Rscript UKB_weighting_HSE/data/make_synthetic_data.R
+Rscript UKB_weighting_census/data/make_synthetic_data.R</code></pre>
+
+<h3>Step 2. Estimate the weights</h3>
+<pre><code>Rscript UKB_weighting_HSE/code/run_hse_weights.R superlearner
+Rscript UKB_weighting_HSE/code/run_hse_weights.R lassologit
+Rscript UKB_weighting_census/code/run_census_weights.R</code></pre>
+<p>The weights generated using HSE are produced by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_HSE/code/run_hse_weights.R">run_hse_weights.R</a>, which is the entry point. It harmonises the selected variables shared between the UK Biobank and HSE through
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_HSE/code/hse_harmonise.R">hse_harmonise.R</a> and the recode registry in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_HSE/code/hse_recodes.R">hse_recodes.R</a>, and then stacks the two samples and fits the participation model in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_HSE/code/hse_weights.R">hse_weights.R</a>. The predictor scheme is in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_HSE/config/hse_weighting.json">hse_weighting.json</a>. The weights generated using Census are produced by
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_census/code/run_census_weights.R">run_census_weights.R</a>, with harmonisation in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_census/code/census_harmonise.R">census_harmonise.R</a> and the model fit in
+<a href="https://github.com/ShujuanChen/bias-unfairness-mortality-prediction/blob/main/UKB_weighting_census/code/census_weights.R">census_weights.R</a>.</p>
+
+<h3>Expected output</h3>
+<p>Each run produces <code>results/&lt;model&gt;/weights/ukb_weights.csv</code>, which includes the predicted participation probability <code>prob_ukb</code> and the participation weight <code>w</code>. Although the demo uses synthetic inputs without meaningful values, the files are structurally identical to those used in the study and feed directly into the bias correction in Tutorial 1.</p>
+
+<h3>Expected run time</h3>
+<p>Generating the synthetic inputs takes under one minute. The weight models in this demo together take about fifteen minutes on a standard desktop processor.</p>
+
+<footer>
+  Part of the analysis code for <em>Selective health data drive bias and unfairness in mortality prediction</em>. Released under the MIT licence.
+</footer>
+</div>
+</body>
+</html>

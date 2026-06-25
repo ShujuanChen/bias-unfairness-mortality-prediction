@@ -1,0 +1,53 @@
+{
+  "_comment": "Configuration for UK Biobank participation-weight estimation against the Health Survey for England. predictors: shared covariates with label, UK Biobank field (ukb_field), the recode applied on the UKB side (registry in code/hse_recodes.R), model type, and include_prediction (false rows are read for harmonisation/filtering). hse_waves: SPSS wave manifest (file path under data/HSE and the per-wave ethnicity column). hse_variable_map: each covariate's per-wave HSE column name and storage type (con = numeric, cat = value-label string). ukb_age_field_override, ukb_england_exclude_centres, age_min, age_max: the UKB age column, excluded assessment centres, and the 40-69 inclusion window.",
+
+  "predictors": [
+    {"label": "sex",               "ukb_field": 31,    "include_prediction": true,  "recode": "sex",            "type": "bin"},
+    {"label": "age",               "ukb_field": 21003, "include_prediction": true,  "recode": "drop_negative",  "type": "con"},
+    {"label": "education_age",      "ukb_field": 845,   "include_prediction": true,  "recode": "education_age",  "type": "con"},
+    {"label": "alcfrequency",       "ukb_field": 1558,  "include_prediction": true,  "recode": "alcohol",        "type": "cat"},
+    {"label": "smoking_status",     "ukb_field": 20116, "include_prediction": true,  "recode": "smoking",        "type": "cat"},
+    {"label": "income",            "ukb_field": 738,   "include_prediction": true,  "recode": "income",         "type": "cat"},
+    {"label": "household_size",     "ukb_field": 709,   "include_prediction": true,  "recode": "household_size", "type": "cat"},
+    {"label": "employment_status",  "ukb_field": 6142,  "include_prediction": true,  "recode": "employment",     "type": "cat"},
+    {"label": "bmi",               "ukb_field": null,  "include_prediction": true,  "recode": "bmi_value",      "type": "con"},
+    {"label": "bmi_cat",           "ukb_field": null,  "include_prediction": true,  "recode": "bmi_category",   "type": "cat"},
+    {"label": "overallhealth",      "ukb_field": 2178,  "include_prediction": true,  "recode": "health",         "type": "cat"},
+    {"label": "height",            "ukb_field": 50,    "include_prediction": true,  "recode": "drop_negative",  "type": "con"},
+    {"label": "urbanisation",       "ukb_field": 20118, "include_prediction": true,  "recode": "urbanisation",   "type": "cat"},
+    {"label": "weight",            "ukb_field": 21002, "include_prediction": true,  "recode": "drop_negative",  "type": "con"},
+    {"label": "assessment_center",  "ukb_field": 54,    "include_prediction": false, "recode": "drop_negative",  "type": "cat"},
+    {"label": "ethnic_background",  "ukb_field": 21000, "include_prediction": false, "recode": "drop_negative",  "type": "cat"},
+    {"label": "education_degree",   "ukb_field": 6138,  "include_prediction": false, "recode": "drop_negative",  "type": "cat"}
+  ],
+
+  "ukb_age_field_override": 21022,
+  "ukb_england_exclude_centres": [11004, 11005, 11003, 11022, 11023],
+  "age_min": 40,
+  "age_max": 69,
+
+  "hse_waves": [
+    {"year": "2006", "path": "UKDA-5809-spss/spss/spss12/hse06ai.sav", "ethnicity_column": "ethinda"},
+    {"year": "2007", "path": "UKDA-6112-spss/spss/spss12/hse07ai.sav", "ethnicity_column": "ethinda"},
+    {"year": "2008", "path": "UKDA-6397-spss/spss/spss24/hse08ai.sav", "ethnicity_column": "origin"},
+    {"year": "2009", "path": "UKDA-6732-spss/spss/spss19/hse09ai.sav", "ethnicity_column": "origin"},
+    {"year": "2010", "path": "UKDA-6986-spss/spss/spss19/hse10ai.sav", "ethnicity_column": "origin"}
+  ],
+  "hse_weight_column": "wt_int",
+
+  "hse_variable_map": [
+    {"label": "sex",              "type": "cat", "columns": {"2006": "sex",     "2007": "sex",     "2008": "sex",   "2009": "sex",   "2010": "sex"}},
+    {"label": "age",              "type": "con", "columns": {"2006": "age",     "2007": "age",     "2008": "age",   "2009": "age",   "2010": "age"}},
+    {"label": "education_age",     "type": "cat", "columns": {"2006": "educend", "2007": "educend", "2008": "educend","2009": "educend","2010": "educend"}},
+    {"label": "alcfrequency",      "type": "cat", "columns": {"2006": "dnoft2",  "2007": "dnoft2",  "2008": "dnoft3","2009": "dnoft3","2010": "dnoft3"}},
+    {"label": "smoking_status",    "type": "cat", "columns": {"2006": "cigst1",  "2007": "cigst1",  "2008": "cigst1","2009": "cigst1","2010": "cigst1"}},
+    {"label": "income",           "type": "cat", "columns": {"2006": "totinc",  "2007": "totinc",  "2008": "totinc","2009": "totinc","2010": "totinc"}},
+    {"label": "household_size",    "type": "con", "columns": {"2006": "hhsize",  "2007": "hhsizeD", "2008": "hhsize","2009": "hhsize","2010": "hhsize"}},
+    {"label": "employment_status", "type": "cat", "columns": {"2006": "econact", "2007": "econact", "2008": "econact","2009": "econact","2010": "econact"}},
+    {"label": "bmi",              "type": "con", "columns": {"2006": "bmiok",   "2007": "bmiok",   "2008": "bmiok", "2009": "bmiok", "2010": "bmiok"}},
+    {"label": "overallhealth",     "type": "cat", "columns": {"2006": "genhelf", "2007": "genhelf", "2008": "genhelf","2009": "genhelf","2010": "genhelf"}},
+    {"label": "height",           "type": "con", "columns": {"2006": "estht",   "2007": "estht",   "2008": "estht", "2009": "estht", "2010": "estht"}},
+    {"label": "urbanisation",      "type": "cat", "columns": {"2006": "URINDEW", "2007": "URINDEW", "2008": "Urban", "2009": "Urban", "2010": "urban"}},
+    {"label": "weight",           "type": "con", "columns": {"2006": "estwt",   "2007": "estwt",   "2008": "estwt", "2009": "estwt", "2010": "estwt"}}
+  ]
+}

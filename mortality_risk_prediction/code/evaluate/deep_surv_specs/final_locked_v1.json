@@ -1,0 +1,15 @@
+{
+  "spec_name": "deep_surv_locked_v1",
+  "hidden_dims": [
+    256,
+    128,
+    64
+  ],
+  "dropout": 0.1,
+  "optimizer": "adamw",
+  "weight_decay": 1e-05,
+  "ties": "efron",
+  "baseline_estimator": "weighted_breslow",
+  "categorical_encoding": "one_hot",
+  "seed": 11
+}

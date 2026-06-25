@@ -1,0 +1,29 @@
+# R dependencies, with the versions used for the published results
+# (R 4.5.2; see Supplementary Method S2). For exact reproduction install the
+# matching versions, e.g. remotes::install_version("survival", "3.8.3").
+# For a quick run, install.packages() the names below (latest versions).
+#
+# Core survival / evaluation
+survival       3.8.3     # Cox proportional-hazards sensitivity model (Efron ties, robust variance); basehaz
+splines        (base R)  # ships with R 4.5.2 — restricted cubic spline for age in the Cox model
+#
+# Participation-weight estimation (Phase 1)
+SuperLearner   2.0.40    # ensemble (base learners below)
+glmnet         4.1.10    # lasso-penalised logistic regression; SL.glmnet base learner
+ranger         0.18.0    # random forest base learner (SL.ranger)
+xgboost        3.2.0.1   # gradient boosting base learner (SL.xgboost)
+fastDummies    1.7.5     # one-hot encoding
+Matrix         1.7.4     # sparse model matrices
+#
+# Data handling / I-O
+dplyr          1.2.0
+stringr        1.6.0
+lubridate      1.9.4
+tibble         3.3.0
+forcats        1.0.1
+plyr           1.8.9
+data.table     1.18.4    # fast CSV read (2011 Census microdata)
+haven          2.5.5     # SPSS .sav read (Health Survey for England)
+readxl         1.4.5     # variable-harmonisation spreadsheets
+openxlsx       4.2.8.1   # descriptive / summary table output
+jsonlite       2.0.0     # read framework_config.json

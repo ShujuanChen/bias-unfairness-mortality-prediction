@@ -147,7 +147,7 @@ build_survival_outcome_from_config <- function(df, death_date_col, outcome_cfg, 
   censor_date[has_death_date] <- pmin(death_date[has_death_date], as.Date(t_admin_end))
 
   data.frame(
-    censor_date = as.Date(censor_date, origin = "1970-01-01"),
+    censor_date = as.Date(censor_date),
     time_days = as.integer(difftime(censor_date, as.Date(t0), units = "days")),
     status = as.integer(target_death_in_followup),
     death_any_in_followup = as.integer(death_any_in_followup),
